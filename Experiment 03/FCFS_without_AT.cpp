@@ -7,30 +7,26 @@ int main() {
 
     int processes[n]; // Array to store process numbers
     int BT[n]; // Array to store burst times
-    int AT[n]; // Array to store arrival times
     int WT[n]; // Array to store waiting times
     int TT[n]; // Array to store turnaround times
 
-    // Input burst times and arrival times for each process
-    printf("Enter burst times and arrival times for each process:\n");
+    // Input burst times for each process
+    printf("Enter burst times for each process:\n");
     for (int i = 0; i < n; i++) {
-        printf("Process %d:\n", i + 1);
-        printf("Burst Time: ");
+        printf("Process %d: ", i + 1);
         scanf("%d", &BT[i]);
-        printf("Arrival Time: ");
-        scanf("%d", &AT[i]);
         processes[i] = i + 1; // Initialize process numbers
     }
 
-    // Perform FCFS scheduling
-    int currentTime = 0; // Initialize the current time
+    // Calculate waiting time for each process
+    WT[0] = 0; // The first process has 0 waiting time
+    for (int i = 1; i < n; i++) {
+        WT[i] = WT[i - 1] + BT[i - 1];
+    }
+
+    // Calculate turnaround time for each process
     for (int i = 0; i < n; i++) {
-        if (AT[i] > currentTime) {
-            currentTime = AT[i];
-        }
-        WT[i] = currentTime - AT[i];
-        TT[i] = WT[i] + BT[i];
-        currentTime += BT[i];
+        TT[i] = BT[i] + WT[i];
     }
 
     // Calculate average waiting time and average turnaround time
@@ -45,10 +41,10 @@ int main() {
     double AWT = TWT / n;
     double ATT = TTT / n;
 
-    // Display the results including averages
-    printf("\nProcess\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
+    // Display the results, including averages
+    printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
     for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", processes[i], BT[i], AT[i], WT[i], TT[i]);
+        printf("%d\t%d\t\t%d\t\t%d\n", processes[i], BT[i], WT[i], TT[i]);
     }
 
     printf("\nAverage Waiting Time: %.2lf\n", AWT);
