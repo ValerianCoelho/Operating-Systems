@@ -1,42 +1,21 @@
 #include <stdio.h>
+#include <limits.h>
 
 #define MAX 100
 
-// Function to perform Round Robin scheduling
-void roundRobin(int n, int BT[], int AT[], int timeSlice) {
-    int RT[MAX]; // Array to store remaining burst times
-    int WT[MAX] = {0}; // Array to store waiting times
-    int TT[MAX] = {0}; // Array to store turnaround times
-    int currentTime = 0; // Current time
-    int completed = 0; // Number of completed processes
+// Function to find the process with the highest priority
+int findHighestPriorityJob(int n, int priority[], int RT[]) {
+    int highestPriority = INT_MAX;
+    int highestPriorityJob = -1;
 
-    // Initialize RT with BT
     for (int i = 0; i < n; i++) {
-        RT[i] = BT[i];
-    }
-
-    while (completed < n) {
-        for (int i = 0; i < n; i++) {
-            if (AT[i] <= currentTime) {
-                if (RT[i] > 0) {
-                    if (RT[i] <= timeSlice) {
-                        // Process completes within the time slice
-                        currentTime += RT[i];
-                        TT[i] = currentTime - AT[i];
-                        RT[i] = 0;
-                        completed++;
-                    } else {
-                        // Process still has remaining burst time
-                        currentTime += timeSlice;
-                        RT[i] -= timeSlice;
-                    }
-
-                    // Calculate waiting time
-                    WT[i] = TT[i] - BT[i];
-                }
-            }
+        if (RT[i] > 0 && priority[i] < highestPriority) {
+            highestPriority = priority[i];
+            highestPriorityJob = i;
         }
     }
+
+    return highestPriorityJob;
 }
 
 int main() {
@@ -45,24 +24,40 @@ int main() {
     scanf("%d", &n);
 
     int BT[MAX]; // Array to store burst times
-    int AT[MAX]; // Array to store arrival times
-    int timeSlice; // Time slice for Round Robin scheduling
+    int priority[MAX]; // Array to store priorities
+    int WT[MAX]; // Array to store waiting times
+    int TT[MAX]; // Array to store turnaround times
+    int RT[MAX]; // Array to store remaining burst times
+    int completed = 0; // Number of completed processes
+    int currentTime = 0; // Current time
 
-    // Input burst times, arrival times, and time slice
-    printf("Enter burst times and arrival times for each process:\n");
+    // Input burst times and priorities for each process
+    printf("Enter burst times and priorities for each process:\n");
     for (int i = 0; i < n; i++) {
         printf("Process %d:\n", i + 1);
         printf("Burst Time: ");
         scanf("%d", &BT[i]);
-        printf("Arrival Time: ");
-        scanf("%d", &AT[i]);
+        printf("Priority (lower value indicates higher priority): ");
+        scanf("%d", &priority[i]);
+        RT[i] = BT[i];
     }
 
-    printf("Enter the time slice for Round Robin: ");
-    scanf("%d", &timeSlice);
+    while (completed < n) {
+        int highestPriorityJob = findHighestPriorityJob(n, priority, RT);
 
-    // Perform Round Robin scheduling
-    roundRobin(n, BT, AT, timeSlice);
+        if (highestPriorityJob == -1) {
+            currentTime++;
+        } else {
+            RT[highestPriorityJob]--;
+            currentTime++;
+
+            if (RT[highestPriorityJob] == 0) {
+                completed++;
+                TT[highestPriorityJob] = currentTime;
+                WT[highestPriorityJob] = TT[highestPriorityJob] - BT[highestPriorityJob];
+            }
+        }
+    }
 
     // Calculate average waiting time and average turnaround time
     double TWT = 0;
@@ -77,9 +72,9 @@ int main() {
     double ATT = TTT / n;
 
     // Display the results
-    printf("\nProcess\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
+    printf("\nProcess\tBurst Time\tPriority\tWaiting Time\tTurnaround Time\n");
     for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, BT[i], AT[i], WT[i], TT[i]);
+        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, BT[i], priority[i], WT[i], TT[i]);
     }
 
     printf("\nAverage Waiting Time: %.2lf\n", AWT);
