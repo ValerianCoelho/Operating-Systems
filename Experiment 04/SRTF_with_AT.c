@@ -1,84 +1,78 @@
 #include <stdio.h>
+#include <stdbool.h>
 #include <limits.h>
 
-#define MAX 100
-
-// Function to find the process with the shortest remaining time
-int findShortestJob(int n, int RT[], int AT[], int currentTime) {
-    int shortestTime = INT_MAX;
-    int shortestJob = -1;
-
-    for (int i = 0; i < n; i++) {
-        if (AT[i] <= currentTime && RT[i] < shortestTime && RT[i] > 0) {
-            shortestTime = RT[i];
-            shortestJob = i;
-        }
-    }
-
-    return shortestJob;
-}
+struct Process {
+    int pid;             // Process ID
+    int arrival_time;    // Arrival time
+    int burst_time;      // Burst time
+    int remaining_time;  // Remaining burst time
+    bool completed;      // Indicates if the process has completed
+};
 
 int main() {
-    int n; // Number of processes
+    int n;
+
+    // Input the number of processes
     printf("Enter the number of processes: ");
     scanf("%d", &n);
 
-    int BT[MAX]; // Array to store burst times
-    int AT[MAX]; // Array to store arrival times
-    int WT[MAX]; // Array to store waiting times
-    int TT[MAX]; // Array to store turnaround times
-    int RT[MAX]; // Array to store remaining burst times
-    int completed = 0; // Number of completed processes
-    int currentTime = 0; // Current time
+    struct Process processes[n];
 
-    // Input burst times and arrival times for each process
-    printf("Enter burst times and arrival times for each process:\n");
+    // Input arrival times and burst times for each process
     for (int i = 0; i < n; i++) {
-        printf("Process %d:\n", i + 1);
-        printf("Burst Time: ");
-        scanf("%d", &BT[i]);
-        printf("Arrival Time: ");
-        scanf("%d", &AT[i]);
-        RT[i] = BT[i];
+        processes[i].pid = i + 1;
+        printf("Enter arrival time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].arrival_time);
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].burst_time);
+        processes[i].remaining_time = processes[i].burst_time;
+        processes[i].completed = false;
     }
 
+    int current_time = 0;
+    int completed = 0;
+    int execution_order[n];
+    int execution_index = 0;
+
     while (completed < n) {
-        int shortestJob = findShortestJob(n, RT, AT, currentTime);
+        int shortest_remaining_time = INT_MAX;
+        int shortest_remaining_time_index = -1;
 
-        if (shortestJob == -1) {
-            currentTime++;
-        } else {
-            RT[shortestJob]--;
-            currentTime++;
-
-            if (RT[shortestJob] == 0) {
-                completed++;
-                TT[shortestJob] = currentTime - AT[shortestJob];
-                WT[shortestJob] = TT[shortestJob] - BT[shortestJob];
+        // Find the process with the shortest remaining burst time among the non-completed processes that have arrived
+        for (int i = 0; i < n; i++) {
+            if (!processes[i].completed && processes[i].arrival_time <= current_time &&
+                processes[i].remaining_time < shortest_remaining_time) {
+                shortest_remaining_time = processes[i].remaining_time;
+                shortest_remaining_time_index = i;
             }
+        }
+
+        if (shortest_remaining_time_index != -1) {
+            // Execute the process with the shortest remaining burst time for 1 time unit
+            processes[shortest_remaining_time_index].remaining_time--;
+            current_time++;
+
+            // Record the execution order
+            execution_order[execution_index++] = processes[shortest_remaining_time_index].pid;
+
+            // Check if the process has completed
+            if (processes[shortest_remaining_time_index].remaining_time == 0) {
+                processes[shortest_remaining_time_index].completed = true;
+                completed++;
+            }
+        } else {
+            // If no process is ready to execute, increment current_time
+            current_time++;
         }
     }
 
-    // Calculate average waiting time and average turnaround time
-    double TWT = 0;
-    double TTT = 0;
-
+    // Display the execution order of processes
+    printf("\nProcess execution order:\n");
     for (int i = 0; i < n; i++) {
-        TWT += WT[i];
-        TTT += TT[i];
+        printf("P%d ", execution_order[i]);
     }
-
-    double AWT = TWT / n;
-    double ATT = TTT / n;
-
-    // Display the results
-    printf("\nProcess\tBurst Time\tArrival Time\tWaiting Time\tTurnaround Time\n");
-    for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, BT[i], AT[i], WT[i], TT[i]);
-    }
-
-    printf("\nAverage Waiting Time: %.2lf\n", AWT);
-    printf("Average Turnaround Time: %.2lf\n", ATT);
+    printf("\n");
 
     return 0;
 }

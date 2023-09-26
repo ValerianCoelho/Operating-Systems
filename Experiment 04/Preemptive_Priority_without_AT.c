@@ -1,84 +1,70 @@
 #include <stdio.h>
-#include <limits.h>
+#include <stdbool.h>
 
-#define MAX 100
-
-// Function to find the process with the highest priority
-int findHighestPriorityJob(int n, int priority[], int RT[]) {
-    int highestPriority = INT_MAX;
-    int highestPriorityJob = -1;
-
-    for (int i = 0; i < n; i++) {
-        if (RT[i] > 0 && priority[i] < highestPriority) {
-            highestPriority = priority[i];
-            highestPriorityJob = i;
-        }
-    }
-
-    return highestPriorityJob;
-}
+struct Process {
+    int pid;         // Process ID
+    int burst_time;  // Burst time
+    int priority;    // Priority (lower value means higher priority)
+    bool completed;  // Indicates if the process has completed
+};
 
 int main() {
-    int n; // Number of processes
+    int n;
+
+    // Input the number of processes
     printf("Enter the number of processes: ");
     scanf("%d", &n);
 
-    int BT[MAX]; // Array to store burst times
-    int priority[MAX]; // Array to store priorities
-    int WT[MAX]; // Array to store waiting times
-    int TT[MAX]; // Array to store turnaround times
-    int RT[MAX]; // Array to store remaining burst times
-    int completed = 0; // Number of completed processes
-    int currentTime = 0; // Current time
+    struct Process processes[n];
 
     // Input burst times and priorities for each process
-    printf("Enter burst times and priorities for each process:\n");
     for (int i = 0; i < n; i++) {
-        printf("Process %d:\n", i + 1);
-        printf("Burst Time: ");
-        scanf("%d", &BT[i]);
-        printf("Priority (lower value indicates higher priority): ");
-        scanf("%d", &priority[i]);
-        RT[i] = BT[i];
+        processes[i].pid = i + 1;
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].burst_time);
+        printf("Enter priority for Process %d: ", i + 1);
+        scanf("%d", &processes[i].priority);
+        processes[i].completed = false;
     }
+
+    int current_time = 0;
+    int completed = 0;
+
+    printf("\nProcess execution order:\n");
 
     while (completed < n) {
-        int highestPriorityJob = findHighestPriorityJob(n, priority, RT);
+        int highest_priority = -1;
+        int highest_priority_index = -1;
 
-        if (highestPriorityJob == -1) {
-            currentTime++;
-        } else {
-            RT[highestPriorityJob]--;
-            currentTime++;
-
-            if (RT[highestPriorityJob] == 0) {
-                completed++;
-                TT[highestPriorityJob] = currentTime;
-                WT[highestPriorityJob] = TT[highestPriorityJob] - BT[highestPriorityJob];
+        // Find the process with the highest priority among the non-completed processes
+        for (int i = 0; i < n; i++) {
+            if (!processes[i].completed && processes[i].priority > highest_priority) {
+                highest_priority = processes[i].priority;
+                highest_priority_index = i;
             }
         }
+
+        if (highest_priority_index != -1) {
+            // Execute the process with the highest priority for 1 time unit
+            processes[highest_priority_index].burst_time--;
+            current_time++;
+
+            // Print the execution information
+            printf("Process %d (Priority: %d) executed. Current time: %d\n",
+                   processes[highest_priority_index].pid,
+                   processes[highest_priority_index].priority,
+                   current_time);
+
+            // Check if the process has completed
+            if (processes[highest_priority_index].burst_time == 0) {
+                processes[highest_priority_index].completed = true;
+                completed++;
+            }
+        } else {
+            // If no process is ready to execute, increment current_time
+            current_time++;
+        }
     }
-
-    // Calculate average waiting time and average turnaround time
-    double TWT = 0;
-    double TTT = 0;
-
-    for (int i = 0; i < n; i++) {
-        TWT += WT[i];
-        TTT += TT[i];
-    }
-
-    double AWT = TWT / n;
-    double ATT = TTT / n;
-
-    // Display the results
-    printf("\nProcess\tBurst Time\tPriority\tWaiting Time\tTurnaround Time\n");
-    for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", i + 1, BT[i], priority[i], WT[i], TT[i]);
-    }
-
-    printf("\nAverage Waiting Time: %.2lf\n", AWT);
-    printf("Average Turnaround Time: %.2lf\n", ATT);
 
     return 0;
 }

@@ -1,78 +1,58 @@
 #include <stdio.h>
 
-#define MAX 100
-
-// Function to find minimum of two integers
-int min(int a, int b) {
-    return (a < b) ? a : b;
-}
+struct Process {
+    int pid;
+    int burst_time;
+    int remaining_time;
+    int waiting_time;
+    int turnaround_time;
+};
 
 int main() {
-    int n; // Number of processes
+    int n, time_slice;
+
+    // Input number of processes and time slice
     printf("Enter the number of processes: ");
     scanf("%d", &n);
+    printf("Enter the time slice: ");
+    scanf("%d", &time_slice);
 
-    int BT[MAX]; // Array to store burst times
-    int WT[MAX]; // Array to store waiting times
-    int TT[MAX]; // Array to store turnaround times
+    struct Process processes[n];
 
     // Input burst times for each process
-    printf("Enter burst times for each process:\n");
     for (int i = 0; i < n; i++) {
-        printf("Process %d: ", i + 1);
-        scanf("%d", &BT[i]);
+        processes[i].pid = i + 1;
+        printf("Enter burst time for Process %d: ", i + 1);
+        scanf("%d", &processes[i].burst_time);
+        processes[i].remaining_time = processes[i].burst_time;
     }
 
-    int timeSlice; // Time slice (quantum)
-    printf("Enter the time slice (quantum): ");
-    scanf("%d", &timeSlice);
+    int completed = 0;
+    int current_time = 0;
 
-    int RT[MAX]; // Array to store remaining burst times
-    int completed = 0; // Number of completed processes
-    int currentTime = 0; // Current time
-
-    // Initialize RT array and WT array
-    for (int i = 0; i < n; i++) {
-        RT[i] = BT[i];
-        WT[i] = 0;
-    }
-
-    // Perform Round Robin scheduling
     while (completed < n) {
         for (int i = 0; i < n; i++) {
-            if (RT[i] > 0) {
-                int timeExecuted = min(timeSlice, RT[i]);
-                RT[i] -= timeExecuted;
-                currentTime += timeExecuted;
-                WT[i] += currentTime - timeExecuted;
-                if (RT[i] == 0) {
+            if (processes[i].remaining_time > 0) {
+                int execute_time = (processes[i].remaining_time < time_slice) ? processes[i].remaining_time : time_slice;
+                current_time += execute_time;
+                processes[i].remaining_time -= execute_time;
+
+                printf("Process %d executed for %d seconds. Current time: %d\n", processes[i].pid, execute_time, current_time);
+
+                if (processes[i].remaining_time == 0) {
                     completed++;
-                    TT[i] = currentTime;
+                    processes[i].turnaround_time = current_time;
+                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
                 }
             }
         }
     }
 
-    // Calculate average waiting time and average turnaround time
-    double TWT = 0;
-    double TTT = 0;
-
-    for (int i = 0; i < n; i++) {
-        TWT += WT[i];
-        TTT += TT[i];
-    }
-
-    double AWT = TWT / n;
-    double ATT = TTT / n;
-
-    // Display the results
+    // Display all values for each process at the end
     printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
     for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\n", i + 1, BT[i], WT[i], TT[i]);
+        printf("%d\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].burst_time, processes[i].waiting_time, processes[i].turnaround_time);
     }
-
-    printf("\nAverage Waiting Time: %.2lf\n", AWT);
-    printf("Average Turnaround Time: %.2lf\n", ATT);
 
     return 0;
 }
