@@ -1,61 +1,71 @@
 #include <stdio.h>
 
 struct Process {
-    int pid;
-    int arrival_time;
-    int burst_time;
-    int remaining_time;
-    int waiting_time;
-    int turnaround_time;
+    int PI;
+    int BT;
+    int RT;
+    int WT;
+    int TT;
 };
 
 int main() {
-    int n, time_slice;
+    int n, time_quantum;
 
-    // Input number of processes and time slice
     printf("Enter the number of processes: ");
     scanf("%d", &n);
-    printf("Enter the time slice: ");
-    scanf("%d", &time_slice);
+
+    printf("Enter the time quantum: ");
+    scanf("%d", &time_quantum);
 
     struct Process processes[n];
 
-    // Input arrival times and burst times for each process
     for (int i = 0; i < n; i++) {
-        processes[i].pid = i + 1;
-        printf("Enter arrival time for Process %d: ", i + 1);
-        scanf("%d", &processes[i].arrival_time);
-        printf("Enter burst time for Process %d: ", i + 1);
-        scanf("%d", &processes[i].burst_time);
-        processes[i].remaining_time = processes[i].burst_time;
+        processes[i].PI = i + 1;
+        printf("Enter burst time for process P%d: ", i + 1);
+        scanf("%d", &processes[i].BT);
+        processes[i].RT = processes[i].BT;
+        processes[i].WT = 0;
+        processes[i].TT = 0;
     }
 
+    int currentTime = 0;
     int completed = 0;
-    int current_time = 0;
 
     while (completed < n) {
         for (int i = 0; i < n; i++) {
-            if (processes[i].remaining_time > 0 && processes[i].arrival_time <= current_time) {
-                int execute_time = (processes[i].remaining_time < time_slice) ? processes[i].remaining_time : time_slice;
-                current_time += execute_time;
-                processes[i].remaining_time -= execute_time;
-
-                printf("Process %d executed for %d seconds. Current time: %d\n", processes[i].pid, execute_time, current_time);
-
-                if (processes[i].remaining_time == 0) {
+            if (processes[i].RT > 0) {
+                if (processes[i].RT <= time_quantum) {
+                    currentTime += processes[i].RT;
+                    processes[i].RT = 0;
                     completed++;
-                    processes[i].turnaround_time = current_time - processes[i].arrival_time;
-                    processes[i].waiting_time = processes[i].turnaround_time - processes[i].burst_time;
+
+                    processes[i].WT = currentTime - processes[i].BT;
+                    processes[i].TT = processes[i].WT + processes[i].BT;
+                } else {
+                    currentTime += time_quantum;
+                    processes[i].RT -= time_quantum;
                 }
             }
         }
     }
 
-    // Display all values for each process at the end
-    printf("\nProcess\tArrival Time\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    // Calculate and display average waiting time and average turnaround time
+    float TWT = 0;
+    float TTT = 0;
+
     for (int i = 0; i < n; i++) {
-        printf("%d\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].pid, processes[i].arrival_time, processes[i].burst_time, processes[i].waiting_time, processes[i].turnaround_time);
+        TWT += processes[i].WT;
+        TTT += processes[i].TT;
     }
+
+    printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
+    for (int i = 0; i < n; i++) {
+        printf("P%d\t%d\t\t\t%d\t\t%d\n", processes[i].PI, processes[i].BT,
+            processes[i].WT, processes[i].TT);
+    }
+
+    printf("\nAverage Waiting Time: %.2f\n", TWT / n);
+    printf("Average Turnaround Time: %.2f\n", TTT / n);
 
     return 0;
 }

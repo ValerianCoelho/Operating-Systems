@@ -1,80 +1,84 @@
 #include <stdio.h>
-#include <stdbool.h>
+#include <limits.h>
 
+// Structure to represent a process
 struct Process {
-    int pid;         // Process ID
-    int burst_time;  // Burst time
-    int priority;    // Priority (lower value means higher priority)
-    int arrival_time; // Arrival time
-    int remaining_time; // Remaining burst time
-    bool completed;  // Indicates if the process has completed
+    int PI;
+    int AT;
+    int RT;
+    int WT;
+    int TT;
+    int BT;
+    int priority;
 };
 
 int main() {
     int n;
 
-    // Input the number of processes
     printf("Enter the number of processes: ");
     scanf("%d", &n);
 
     struct Process processes[n];
 
-    // Input burst times, priorities, and arrival times for each process
     for (int i = 0; i < n; i++) {
-        processes[i].pid = i + 1;
-        printf("Enter arrival time for Process %d: ", i + 1);
-        scanf("%d", &processes[i].arrival_time);
-        printf("Enter burst time for Process %d: ", i + 1);
-        scanf("%d", &processes[i].burst_time);
-        printf("Enter priority for Process %d: ", i + 1);
+        processes[i].PI = i + 1;
+        printf("Enter arrival time for process P%d: ", i + 1);
+        scanf("%d", &processes[i].AT);
+        printf("Enter burst time for process P%d: ", i + 1);
+        scanf("%d", &processes[i].BT);
+        printf("Enter priority for process P%d: ", i + 1);
         scanf("%d", &processes[i].priority);
-        processes[i].remaining_time = processes[i].burst_time;
-        processes[i].completed = false;
+        processes[i].RT = processes[i].BT;
+        processes[i].WT = 0;
+        processes[i].TT = 0;
     }
 
-    int current_time = 0;
+    int currentTime = 0;
     int completed = 0;
-    int execution_order[n];
-    int execution_index = 0;
+    float TWT = 0;
+    float TTT = 0;
 
     while (completed < n) {
-        int highest_priority = -1;
-        int highest_priority_index = -1;
+        int highestPriority = INT_MAX;
+        int selectedProcess = -1;
 
-        // Find the process with the highest priority among the non-completed processes that have arrived
         for (int i = 0; i < n; i++) {
-            if (!processes[i].completed && processes[i].arrival_time <= current_time &&
-                processes[i].priority > highest_priority) {
-                highest_priority = processes[i].priority;
-                highest_priority_index = i;
+            if (processes[i].AT <= currentTime && processes[i].priority < highestPriority && processes[i].RT > 0) {
+                highestPriority = processes[i].priority;
+                selectedProcess = i;
             }
         }
 
-        if (highest_priority_index != -1) {
-            // Execute the process with the highest priority for 1 time unit
-            processes[highest_priority_index].remaining_time--;
-            current_time++;
-
-            // Record the execution order
-            execution_order[execution_index++] = processes[highest_priority_index].pid;
-
-            // Check if the process has completed
-            if (processes[highest_priority_index].remaining_time == 0) {
-                processes[highest_priority_index].completed = true;
-                completed++;
-            }
+        if (selectedProcess == -1) {
+            currentTime++;
         } else {
-            // If no process is ready to execute, increment current_time
-            current_time++;
+            processes[selectedProcess].RT--;
+            currentTime++;
+
+            if (processes[selectedProcess].RT == 0) {
+                completed++;
+
+                // Calculate turnaround time and waiting time
+                processes[selectedProcess].WT = currentTime - processes[selectedProcess].AT - processes[selectedProcess].BT;
+                processes[selectedProcess].TT = processes[selectedProcess].WT + processes[selectedProcess].BT;
+
+                // Add to total waiting and turnaround times for average calculation
+                TWT += processes[selectedProcess].WT;
+                TTT += processes[selectedProcess].TT;
+            }
         }
     }
 
-    // Display the execution order of processes
-    printf("\nProcess execution order:\n");
+    // Output results
+    printf("\nProcess\tArrival Time\tBurst Time\tPriority\tWaiting Time\tTurnaround Time\n");
     for (int i = 0; i < n; i++) {
-        printf("P%d ", execution_order[i]);
+        printf("P%d\t%d\t\t%d\t\t%d\t\t%d\t\t%d\n", processes[i].PI, processes[i].AT, processes[i].RT,
+            processes[i].priority, processes[i].WT, processes[i].TT);
     }
-    printf("\n");
+
+    // Calculate and display average waiting time and average turnaround time
+    printf("\nAverage Waiting Time: %.2f\n", TWT / n);
+    printf("Average Turnaround Time: %.2f\n", TTT / n);
 
     return 0;
 }
