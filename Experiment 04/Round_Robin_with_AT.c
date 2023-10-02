@@ -1,11 +1,12 @@
 #include <stdio.h>
 
+// Structure to represent a process
 struct Process {
-    int PI;
-    int BT;
-    int RT;
-    int WT;
-    int TT;
+    int PI; // Process ID
+    int BT; // Burst Time
+    int RT; // Remaining Time
+    int WT; // Waiting Time
+    int TT; // Turnaround Time
 };
 
 int main() {
@@ -19,10 +20,11 @@ int main() {
 
     struct Process processes[n];
 
+    // Input process information for each process.
     for (int i = 0; i < n; i++) {
         processes[i].PI = i + 1;
         printf("Enter burst time for process P%d: ", i + 1);
-        scanf("%d", &processes[i].BT);
+        scanf("%d", &processes[i].BT); 
         processes[i].RT = processes[i].BT;
         processes[i].WT = 0;
         processes[i].TT = 0;
@@ -31,6 +33,7 @@ int main() {
     int currentTime = 0;
     int completed = 0;
 
+    // Execute the Round Robin scheduling algorithm until all processes are completed.
     while (completed < n) {
         for (int i = 0; i < n; i++) {
             if (processes[i].RT > 0) {
@@ -49,7 +52,6 @@ int main() {
         }
     }
 
-    // Calculate and display average waiting time and average turnaround time
     float TWT = 0;
     float TTT = 0;
 
@@ -60,7 +62,7 @@ int main() {
 
     printf("\nProcess\tBurst Time\tWaiting Time\tTurnaround Time\n");
     for (int i = 0; i < n; i++) {
-        printf("P%d\t%d\t\t\t%d\t\t%d\n", processes[i].PI, processes[i].BT,
+        printf("P%d\t%d\t\t%d\t\t%d\n", processes[i].PI, processes[i].BT,
             processes[i].WT, processes[i].TT);
     }
 

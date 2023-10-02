@@ -1,13 +1,14 @@
 #include <stdio.h>
 #include <limits.h>
 
+// Define a structure to represent a process with various attributes.
 struct Process {
-    int PI;
-    int AT;
-    int BT;
-    int RT;
-    int WT;
-    int TT;
+    int PI;  // Process ID
+    int AT;  // Arrival Time
+    int BT;  // Burst Time
+    int RT;  // Remaining Time
+    int WT;  // Waiting Time
+    int TT;  // Turnaround Time
 };
 
 int main() {
@@ -18,6 +19,7 @@ int main() {
 
     struct Process processes[n];
 
+    // Input process information for each process.
     for (int i = 0; i < n; i++) {
         processes[i].PI = i + 1;
         printf("Enter arrival time for process P%d: ", i + 1);
@@ -32,10 +34,12 @@ int main() {
     float TWT = 0;
     float TTT = 0;
 
+    // Execute the scheduling algorithm until all processes are completed.
     while (completed < n) {
         int shortest = -1;
         int shortestTime = INT_MAX;
 
+        // Find the process with the shortest remaining time that has arrived.
         for (int i = 0; i < n; i++) {
             if (processes[i].AT <= currentTime && processes[i].RT < shortestTime && processes[i].RT > 0) {
                 shortest = i;
@@ -44,14 +48,14 @@ int main() {
         }
 
         if (shortest == -1) {
-            currentTime++;
+            currentTime++; // No eligible process, time increment
         } else {
-            processes[shortest].RT--;
+            processes[shortest].RT--; // Execute the selected process for one time unit
             currentTime++;
 
-            if (processes[shortest].RT == 0) {
-                processes[shortest].TT = currentTime - processes[shortest].AT;
-                processes[shortest].WT = processes[shortest].TT - processes[shortest].BT;
+            if (processes[shortest].RT == 0) { // Process has completed execution.
+                processes[shortest].WT = currentTime - processes[shortest].BT - processes[shortest].AT;
+                processes[shortest].TT = processes[shortest].WT + processes[shortest].BT;
 
                 TWT += processes[shortest].WT;
                 TTT += processes[shortest].TT;
