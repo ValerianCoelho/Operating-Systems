@@ -1,5 +1,11 @@
 #include <stdio.h>
 
+void swap(int *x, int *y) {
+    int temp = *x;
+    *x = *y;
+    *y = temp;
+}
+
 int main() {
     int n; // Number of processes
     printf("Enter the number of processes: ");
@@ -20,6 +26,18 @@ int main() {
         printf("Arrival Time: ");
         scanf("%d", &AT[i]);
         processes[i] = i + 1; // Initialize process numbers
+    }
+
+    // Sort processes by arrival time using Bubble Sort
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = 0; j < n - i - 1; j++) {
+            if (AT[j] > AT[j + 1]) {
+                // Swap the elements to sort by arrival time
+                swap(&AT[j], &AT[j + 1]);
+                swap(&BT[j], &BT[j + 1]);
+                swap(&processes[j], &processes[j + 1]);
+            }
+        }
     }
 
     // Perform FCFS scheduling
