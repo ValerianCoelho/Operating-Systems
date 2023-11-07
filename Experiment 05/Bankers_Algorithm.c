@@ -1,17 +1,21 @@
 #include <stdio.h>
 
-int main() {
-    int n, m;
-    
+#define MAX 20
+
+int n, m;
+int available[MAX];
+int max[MAX][MAX];
+int allocation[MAX][MAX];
+int need[MAX][MAX];
+
+int count = 0;
+
+void input() {
     printf("Enter the Number of Processes : ");
     scanf("%d", &n);
 
     printf("Enter the Number of Resources : ");
     scanf("%d", &m);
-
-    int available[m];
-    int max[n][m];
-    int allocation[n][m];
 
     printf("Enter the Available Processes : ");
     for(int i=0; i<m; i++) {
@@ -30,13 +34,6 @@ int main() {
             scanf("%d", &allocation[i][j]);
         }
     }
-
-    int need[n][m];
-    int finish[n];
-    int sequence[n];
-    int work[m];
-    int count = 0;
-
     // Calculate the need matrix
     printf("Need Matrix :-\n");
     for (int i = 0; i < n; i++) {
@@ -46,40 +43,40 @@ int main() {
         }
         printf("\n");
     }
+}
 
-    // Initialize the work array
-    for (int i = 0; i < m; i++) {
-        work[i] = available[i];
-    }
+void safe_sequence() {
+    int work[MAX], finish[MAX], sequence[MAX];
 
-    for (int i = 0; i < n; i++) {
-        finish[i] = 0;
-    }
+    // set work[i] = available[i]
+    for (int i = 0; i < m; i++)   work[i] = available[i];
+
+    // set finished[i] = 0, where i = 0, 1, 2, ...
+    for (int i = 0; i < n; i++)   finish[i] = 0;
 
     while (count < n) {
-        int found = 0;
+        int isSafe = 0;
         for (int i = 0; i < n; i++) {
             if (!finish[i]) {
-                int safe = 1;
+                int canGrant = 1;
                 for (int j = 0; j < m; j++) {
                     if (need[i][j] > work[j]) {
-                        safe = 0;
+                        canGrant = 0;
                         break;
                     }
                 }
-                if (safe) {
+                if (canGrant) {
                     for (int j = 0; j < m; j++) {
                         work[j] += allocation[i][j];
                     }
                     sequence[count++] = i;
                     finish[i] = 1;
-                    found = 1;
+                    isSafe = 1;
                 }
             }
         }
-        if (!found) {
+        if (!isSafe) {
             printf("System is in an unsafe state.\n");
-            return 1;
         }
     }
 
@@ -90,11 +87,13 @@ int main() {
             printf(" -> ");
     }
     printf("\n");
+}
 
+void resource_request() {
     int process_id;
-    int request[m];
+    int request[MAX];
 
-    printf("Enter the Process ID : ");
+    printf("Enter the requested Process ID : ");
     scanf("%d", &process_id);
 
     printf("Enter the request : ");
@@ -115,6 +114,11 @@ int main() {
     } else {
         printf("Request cannot be granted");
     }
+}
 
+int main() {
+    input();
+    safe_sequence();
+    resource_request();
     return 0;
 }

@@ -32,7 +32,7 @@ void input() {
     }
 }
 
-void detectDeadlock() {
+void deadlock_detection() {
     int s = 0; // Safe Sequence Array Index Variable
     int isSafe; // Check if safe sequence exists
     int canGrant; // Flag to Check if the resource can be granted
@@ -82,7 +82,7 @@ void detectDeadlock() {
     }
 }
 
-void requestResource() {
+void resource_request() {
     int process_id; // id of requested process
     int additional_request[MAX];
 
@@ -97,13 +97,13 @@ void requestResource() {
     for (int j = 0; j < m; j++) {
         request[process_id][j] += additional_request[j];
     }
-    detectDeadlock();
+    deadlock_detection();
 }
 
 int main() {
     input();
-    detectDeadlock();
-    requestResource();
+    deadlock_detection();
+    resource_request();
     return 0;
 }
 
