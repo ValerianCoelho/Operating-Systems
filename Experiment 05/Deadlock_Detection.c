@@ -1,97 +1,128 @@
-#include<stdio.h>
+#include <stdio.h>
 
-int n, m, i, j, request[10][10], p[10], alloc[10][10], work[10], finish[10], count = 0, seq[10], s = 0, check1, check2, avl_vec[10];
-int req[10][10], reqprocess, update_req[10];
+#define MAX 20
+
+int n, m;
+int request[MAX][MAX], allocation[MAX][MAX], available[MAX];
+
 void input() {
-    printf("Enter number of processes\n");
-    scanf("%d", & n);
-    printf("\nEnter number of resources\n");
-    scanf("%d", & m);
-    printf("\nEnter the request matrix\n");
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            scanf("%d", & request[i][j]);
-        }
-    }
-    printf("\n");
-    printf("Enter available vector\n");
-    for (i = 0; i < m; i++) {
-        scanf("%d", & avl_vec[i]);
-    }
-    printf("\nEnter allocation matrix\n");
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
+    printf("Enter the number of processes: ");
+    scanf("%d", &n);
 
-            scanf("%d", & alloc[i][j]);
+    printf("Enter the number of resources: ");
+    scanf("%d", &m);
+
+    printf("Enter the allocation matrix:-\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < m; j++) {
+            scanf("%d", &allocation[i][j]);
         }
+    }
+
+    printf("Enter the request matrix:-\n");
+    for (int i=0; i<n; i++) {
+        for (int j=0; j<m; j++) {
+            scanf("%d", &request[i][j]);
+        }
+    }
+
+    printf("Enter available resource vector: ");
+    for (int i = 0; i < m; i++) {
+        scanf("%d", &available[i]);
     }
 }
-void deadlock_detection() {
-    count = 0, check1 = 0, check2 - 0, s = 0;
-    for (i = 0; i < m; i++) {
-        work[j] = avl_vec[j];
-    }
-    for (i = 0; i < n; i++) {
-        finish[i] = 0;
-    }
-    while (count != n) {
-        for (i = 0; i < n; i++) {
-            check1 = 0;
-            if (finish[i]) continue;
-            for (j = 0; j < m; j++) {
-                if (request[i][j] < ; = work[j]) {
-                    check1++;
-                }
-                if (check1 == m) {
-                    for (j = 0; j < m; j++) {
 
-                        work[j] = work[j] + alloc[i][j];
-                    }
-                    finish[i] = 1;
-                    seq[s] = i;
-                    s++;
+void detectDeadlock() {
+    int s = 0; // Safe Sequence Array Index Variable
+    int isSafe; // Check if safe sequence exists
+    int canGrant; // Flag to Check if the resource can be granted
+
+    int work[MAX], finished[MAX], sequence[MAX];
+
+    // set work[i] = available[i]
+    for (int i = 0; i < m; i++)   work[i] = available[i];
+
+    // set finished[i] = 0, where i = 0, 1, 2, ...
+    for (int i = 0; i < n; i++)   finished[i] = 0;
+
+    for(int k=0; k<n; k++) {
+        for (int i=0; i<n; i++) {
+            canGrant = 1;
+
+            if (finished[i]) continue;  // Process has finished Execution
+
+            for (int j = 0; j < m; j++) { // Check if Current Request can be granted
+                if (request[i][j] > work[j]) {
+                    canGrant = 0;
+                    break;
                 }
             }
+            if (canGrant) { // Grant the request if it can be granted
+                for (int j=0; j<m; j++) {
+                    work[j] += allocation[i][j];
+                }
+                finished[i] = 1;
+                sequence[s++] = i;
+            }
         }
-        count++;
+        k++;
     }
-    for (i = 0; i < n; i++) {
-        if (finish[i] == 1) {
-            check2++;
+
+    for (int i = 0; i < n; i++) { // Check if safe sequence exists
+        if (!finished[i]) {
+            isSafe = 0;
         }
     }
-    if (check2 == n) {
-        printf("\nSafe sequence exists\n");
-        for (i = 0; i < n; i++) {
-            printf("%d\t", seq[i]);
-        }
-        printf("\nDeadlock does not exists since safe sequence exists\n");
-    } else {
-        printf("\nDeadlock exists since safe sequence does not exist");
+    if (isSafe) { // If safe sequence exists
+        printf("Safe sequence : ");
+        for (int i = 0; i < n; i++) printf("P%d ", sequence[i]);
+        printf("\nDeadlock Does not Exist");
+    } else { // if deadlock exists
+        printf("Deadlock exists\n");
     }
 }
 
-void resource_request() {
-    printf("\nEnter the process requested\n");
-    scanf("%d", & reqprocess);
-    printf("Enter the additional request\n");
-    for (j = 0; j < m; j++) {
-        scanf("%d", & update_req[j]);
+void requestResource() {
+    int process_id; // id of requested process
+    int additional_request[MAX];
+
+    printf("\nEnter the requested process ID: ");
+    scanf("%d", &process_id);
+
+    printf("Enter the additional request: ");
+    for (int j = 0; j < m; j++) {
+        scanf("%d", &additional_request[j]);
     }
-    for (j = 0; j < m; j++) {
-        req[reqprocess][j] += update_req[j];
+    
+    for (int j = 0; j < m; j++) {
+        request[process_id][j] += additional_request[j];
     }
-    for (i = 0; i < n; i++) {
-        for (j = 0; j < m; j++) {
-            printf("%d", req[i][j]);
-        }
-        printf("\n");
-    }
-    deadlock_detection();
+    detectDeadlock();
 }
 
-void main() {
+int main() {
     input();
-    deadlock_detection();
-    resource_request();
+    detectDeadlock();
+    requestResource();
+    return 0;
 }
+
+// Allocation Matrix
+// 0 1 0
+// 2 0 0
+// 3 0 3
+// 2 1 7
+// 0 0 2
+
+// Request Matrix
+// 0 0 0
+// 2 0 2
+// 0 0 0
+// 1 0 0
+// 0 0 2
+
+// Available Vector
+// 0 0 0
+
+// Requesting process id : 2
+// Additional Request : 0 0 1
