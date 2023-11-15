@@ -1,77 +1,105 @@
 #include <stdio.h>
 #include <math.h>
 
-#define MAX 100 // Assuming a maximum array size
+#define MAX 100
 
 void bubbleSort(int arr[], int n) {
-    for (int i = 0; i < n - 1; i++) {
-        for (int j = 0; j < n - i - 1; j++) {
-            if (arr[j] > arr[j + 1]) {
-                // Swap arr[j] and arr[j + 1]
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
                 int temp = arr[j];
-                arr[j] = arr[j + 1];
-                arr[j + 1] = temp;
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
             }
         }
     }
 }
 
-int main() {
-    int n;
-    int start;
-    int sequence[MAX];
-    int totalHeadMovement = 0;
-    int left = -1; // Initialize to -1 to handle cases where the start is at the beginning
-    int right = n; // Initialize to n to handle cases where the start is at the end
-    int count = 0;
-    int current;
-
-    printf("Enter the Start Position : ");
-    scanf("%d", &start);
-
-    printf("Enter the number of reads : ");
-    scanf("%d", &n);
-
-    printf("Enter the Sequence : ");
+int findIndex(int arr[], int n, int value) {
     for (int i = 0; i < n; i++) {
+        if (arr[i] == value) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+int main() {
+    int current; // Position of the current Head Position
+    int diskSize; // Size of the disk
+    int sequenceSize; // Size of the Head Movement Sequence
+    int index; // Store the index of current head position while scheduling
+    int rightIndex;
+    int leftIndex;
+    int prevIndex; // Store the index of previous head position while scheduling
+    int repositioningIndex; // repositioning index to be set after index hits upper or lower bound
+    int count = 0; // count the number of request scheduled
+    int totalHeadMovement = 0; // store the total Head Movement
+    int displacement; // Calculate the displacement between current and previous disk scheduled
+    int leftDisplacement;
+    int rightDisplacement;
+
+    int sequence[MAX]; // Store the Head Movement Sequence
+
+    printf("Enter the current position : ");
+    scanf("%d", &current);
+
+    printf("Enter the disk size : ");
+    scanf("%d", &diskSize);
+
+    printf("Enter the Size of the Sequence : ");
+    scanf("%d", &sequenceSize);
+
+    printf("Enter the sequence : ");
+    for(int i=0; i<sequenceSize; i++) {
         scanf("%d", &sequence[i]);
     }
 
-    // Sort the sequence array using bubble sort
-    bubbleSort(sequence, n);
+    sequence[sequenceSize] = current; // Add the current Head Position in the sequence
+    sequenceSize++; // Accommodate for the new element inserted above
 
-    // Calculate Left and Right Index
-    for (int i = 0; i < n - 1; i++) {
-        if (start >= sequence[i] && start <= sequence[i + 1]) {
-            left = i;
-            right = i + 1;
-            break;
+    bubbleSort(sequence, sequenceSize); // sort the sequence in ascending order
+
+    index = findIndex(sequence, sequenceSize, current); // Find the index of the value stored in current
+    leftIndex = index - 1;
+    rightIndex = index + 1;
+
+    prevIndex = index;
+
+    while(count < sequenceSize) {
+        displacement = abs(sequence[index] - sequence[prevIndex]);
+        totalHeadMovement += displacement;
+        prevIndex = index;
+
+        leftDisplacement = abs(sequence[index] - sequence[leftIndex]);
+        rightDisplacement = abs(sequence[rightIndex] - sequence[index]);
+
+        if(leftDisplacement < rightDisplacement 
+           && leftIndex >= 0 // if leftIndex >=0 means that the leftDisplacement Calculated Above is invalid
+           || rightIndex >= sequenceSize // if rightIndex >= sequenceSize means that the rightDisplacement Calculated Above is invalid
+        ) {
+            index = leftIndex;
+            leftIndex--;
         }
-    }
-
-    if (start - sequence[left] < sequence[right] - start) {
-        current = left;
-        left = left - 1;
-    } else {
-        current = right;
-        right = right + 1;
-    }
-    totalHeadMovement += abs(start - sequence[current]);
-    count = count + 1;
-
-    while (count < n) {
-        if (sequence[current] - sequence[left] < sequence[right] - sequence[current] && left >= 0 || right >= 12) {
-            totalHeadMovement += abs(sequence[current] - sequence[left]);
-            current = left;
-            left = left - 1;
-        } else {
-            totalHeadMovement += abs(sequence[right] - sequence[current]);
-            current = right;
-            right = right + 1;
+        else {
+            index = rightIndex;
+            rightIndex++;
         }
         count++;
     }
-    printf("\nTotal Head Movement : %d", totalHeadMovement);
 
-    return 0;
+    printf("Total Head Movement : %d", totalHeadMovement);
+
 }
+
+// Previous Head Position : 50
+// Current Head Position : 64
+// No of Disks : 200
+// Sequence Size : 12
+// Sequence: 181 6 100 9 77 45 170 132 53 190 88 61
+
+// Previous Head Position : 100
+// Current Head Position : 143
+// No of Disks : 2500
+// Sequence Size : 10
+// Sequence : 80 400 2300 1500 1050 2000 100 1888 1580 1700
