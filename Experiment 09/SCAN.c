@@ -73,12 +73,11 @@ int main() {
         totalHeadMovement += displacement;
         prevIndex = index;
 
-        if(index == 0 || index == sequenceSize-1) { // if index hits either the upper of lower bounds
+        index += direction;
+
+        if(index < 0 || index > sequenceSize-1) { // if index hits either the upper of lower bounds
             index = repositioningIndex;
             direction = -direction; // change the direction of scheduling
-        }
-        else {
-            index += direction;
         }
         count++;
 
