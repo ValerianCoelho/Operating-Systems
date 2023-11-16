@@ -26,26 +26,26 @@ int findIndex(int arr[], int n, int value) {
 
 int main() {
     int current; // Position of the current Head Position
-    int diskSize; // Size of the disk
     int sequenceSize; // Size of the Head Movement Sequence
+
     int index; // Store the index of current head position while scheduling
+    int prevIndex; // Store the index of previous head position while scheduling
+
     int rightIndex;
     int leftIndex;
-    int prevIndex; // Store the index of previous head position while scheduling
-    int repositioningIndex; // repositioning index to be set after index hits upper or lower bound
-    int count = 0; // count the number of request scheduled
-    int totalHeadMovement = 0; // store the total Head Movement
-    int displacement; // Calculate the displacement between current and previous disk scheduled
+
     int leftDisplacement;
     int rightDisplacement;
+
+    int count = 0; // count the number of request scheduled
+    int displacement; // Calculate the displacement between current and previous disk scheduled
+    int repositioningIndex; // repositioning index to be set after index hits upper or lower bound
+    int totalHeadMovement = 0; // store the total Head Movement
 
     int sequence[MAX]; // Store the Head Movement Sequence
 
     printf("Enter the current position : ");
     scanf("%d", &current);
-
-    printf("Enter the disk size : ");
-    scanf("%d", &diskSize);
 
     printf("Enter the Size of the Sequence : ");
     scanf("%d", &sequenceSize);
@@ -63,7 +63,6 @@ int main() {
     index = findIndex(sequence, sequenceSize, current); // Find the index of the value stored in current
     leftIndex = index - 1;
     rightIndex = index + 1;
-
     prevIndex = index;
 
     while(count < sequenceSize) {
@@ -87,9 +86,8 @@ int main() {
         }
         count++;
     }
-
-    printf("Total Head Movement : %d", totalHeadMovement);
-
+    printf("\nTotal Head Movement : %d", totalHeadMovement);
+    return 0;
 }
 
 // Previous Head Position : 50
