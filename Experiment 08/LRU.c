@@ -13,7 +13,7 @@ int main() {
     int page_reference[MAX];
     int frame_index[MAX];
 
-    printf("Enter the RAM Size : ");
+    printf("Enter the no of frames allocated to the process : ");
     scanf("%d", &ram_size);
 
     printf("Enter the no of pages in the page reference string : ");

@@ -14,7 +14,7 @@ int main() {
     int ram[MAX];
     int page_reference[MAX];
 
-    printf("Enter the RAM Size : ");
+    printf("Enter the no of frames allocated to the process : ");
     scanf("%d", &ram_size);
 
     printf("Enter the no of pages in the page reference string : ");
@@ -31,14 +31,11 @@ int main() {
 
     for(int i=0; i<no_of_pages; i++) {
         page_found = 0;
-        printf("%d) ", i);
         for(int j=0; j<ram_size; j++) {
             if(page_reference[i] == ram[j]) {
                 page_found = 1;
             }
-            printf("%d ", ram[j]);
         }
-        printf("\n");
         if(!page_found) {
             page_faults++;
             replacement_index = 0;
@@ -46,26 +43,24 @@ int main() {
             for(int j=0; j<ram_size; j++) {
                 index = -1;
                 if(ram[j] == -1) {
-replacement_index = j;
-break;
-}
+                    replacement_index = j;
+                    break;
+                    }
                 for(int k=i; k<no_of_pages; k++) {
-                    //printf("%d) %d = %d? \n", i, ram[j], page_reference[k]);
                     if(ram[j] == page_reference[k]) {
-index = k;
+                        index = k;
                         break;
                     }
                 }
                 if(index == -1) {
-replacement_index = j;
-break;
-}
+                    replacement_index = j;
+                    break;
+                }
                 if(max < index) {
                     max = index;
                     replacement_index = j;
                 }
             }
-            //printf("replacement index : %d\n", replacement_index);
             ram[replacement_index] = page_reference[i];
         }
     }
