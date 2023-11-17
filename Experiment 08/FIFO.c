@@ -1,6 +1,6 @@
 #include <stdio.h>
 
-#define MAX 20
+#define MAX 100
 
 int main() {
     int page_found;
@@ -12,7 +12,7 @@ int main() {
     int ram[MAX];
     int page_reference[MAX];
 
-    printf("Enter the RAM Size : ");
+    printf("Enter the no of frames allocated to the process : ");
     scanf("%d", &ram_size);
 
     printf("Enter the no of pages in the page reference string : ");
